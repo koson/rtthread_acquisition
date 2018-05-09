@@ -1,0 +1,80 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd     = os.path.join(str(Dir('#')), 'drivers')
+
+# add the general drivers.
+src = Split("""
+board.c
+stm32f10x_it.c
+led.c
+ds18b20.c
+global.c
+usart.c
+uart2.c
+uart3.c
+uart4.c
+uart5.c
+uart_all.c
+uart_sensor_all.c
+spi_data.c
+servo_pulse.c
+""")
+
+if GetDepend(['RT_USING_PIN']):
+    src += ['gpio.c']
+
+if GetDepend(['RT_USING_SPI']):
+    src += ['rt_stm32f10x_spi.c']
+
+# add w25q64 driver
+if GetDepend(['RT_USING_W25QXX']):
+    src += ['rt_spi_flash_device.c','w25q64.c']
+
+# add SD_CARD driver
+if GetDepend(['RT_USING_SD_CARD']):
+    src += ['msd.c']
+
+# add CS5532 driver
+if GetDepend(['RT_USING_CS5532']):
+    src += ['cs5532.c']
+
+# add servo motor driver
+if GetDepend(['RT_USING_SERVO_MOTOR']):
+    src += ['servo_motor.c']
+
+# add canbus driver.
+if GetDepend('RT_USING_CAN'):
+    src += ['bxcan.c']
+
+# add Ethernet drivers.
+if GetDepend('RT_USING_LWIP'):
+    src += ['dm9000a.c']
+
+# add Ethernet drivers.
+#if GetDepend('RT_USING_DFS'):
+#    src += ['sdcard.c']
+
+# add Ethernet drivers.
+if GetDepend('RT_USING_RTC'):
+    src += ['rtc.c']
+
+# add Ethernet drivers.
+if GetDepend('RT_USING_RTGUI'):
+    src += ['touch.c']
+    if rtconfig.RT_USING_LCD_TYPE == 'ILI932X':
+        src += ['ili_lcd_general.c']
+    elif rtconfig.RT_USING_LCD_TYPE == 'SSD1289':
+        src += ['ssd1289.c']
+
+# add wdt driver.
+if GetDepend('RT_USING_WDT'):
+    src += ['stm32f1_wdg.c']
+
+    
+CPPPATH = [cwd]
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')
